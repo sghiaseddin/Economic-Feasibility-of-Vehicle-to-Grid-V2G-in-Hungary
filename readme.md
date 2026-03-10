@@ -4,7 +4,7 @@ The goal of the project is to evaluate whether electric vehicle batteries can ec
 
 * The analysis is currently work in progress. This repository represents an initial public version of the project and will evolve as the economic modeling and simulations are refined.
 
-## Version 0.0.2
+## Version 0.0.3
 
 # Project Motivation
 
