@@ -2,151 +2,257 @@ This repository contains the research code and exploratory analysis for a univer
 
 The goal of the project is to evaluate whether electric vehicle batteries can economically support grid operations by providing distributed energy storage and participating in electricity markets.
 
-* The analysis is currently work in progress. This repository represents an initial public version of the project and will evolve as the economic modeling and simulations are refined.
+This repository represents the final analytical version of the project including data processing, time-series modeling, economic simulation, and Net Present Value evaluation.
 
-## Version 0.0.3
+
+## Version 1.0.0
+
 
 # Project Motivation
 
 Hungary is experiencing rapidly increasing renewable electricity production, particularly from solar PV. This has created structural imbalances in the electricity system:
-- Midday oversupply and low/negative electricity prices
-- Evening peak demand and higher marginal generation costs
-- Rising grid balancing costs
+
+- Midday oversupply and low / negative electricity prices  
+- Evening peak demand and higher marginal generation costs  
+- Increasing need for grid balancing services  
 
 Vehicle-to-Grid (V2G) technology could potentially help address these issues by allowing electric vehicles to act as distributed energy storage resources.
 
-This project attempts to perform a data-driven microeconomic assessment of V2G feasibility in Hungary.  ￼
+This project performs a data-driven microeconomic assessment of V2G feasibility in Hungary.
+
 
 # Research Objectives
 
-The project evaluates V2G from the perspective of grid operators and the electricity system, focusing on microeconomic impacts.
+The project evaluates V2G from the perspective of the electricity system and grid economics.
 
-Key research questions include:
+Key research questions:
+
 - What is the potential arbitrage revenue per EV?
 - What grid-level economic value could V2G generate?
-- How much peak load reduction could V2G provide?
-- What is the payback period for grid-side investments?
-- What would be the Net Present Value (NPV) of a V2G program?
+- How many EVs could realistically participate in V2G?
+- What are the infrastructure costs of V2G deployment?
+- What is the Net Present Value (NPV) of a 10-year V2G program?
+- What level of incentive is required for EV owners to participate?
 
-The analysis also explores sensitivity scenarios, including incentive packages for EV owners.  ￼
 
 # Project Status
 
-* Work in progress
+Completed analytical version.
 
-Current repository version includes:
+Current repository includes:
+
 - Data ingestion and preprocessing
-- Initial exploratory analysis
-- Early-stage economic modeling
-- Visualization and investigation of electricity market behavior
+- Exploratory time-series analysis
+- Electricity price forecasting to 2030
+- EV fleet projection to 2030
+- V2G economic simulation (2021-2030)
+- Infrastructure cost modeling
+- Incentive calculation
+- Net Present Value (NPV) analysis
+- Output export (CSV + PNG)
 
-The current outputs may not yet fully align with the final objectives defined in the project charter, as the modeling and simulation components are still under development.
-
-Future updates will include:
-- refined economic simulations
-- scenario analysis
-- final economic evaluation
 
 # Repository Structure
+```
+project/
+├─ data
+│       Raw input datasets
+├─ output
+│       Generated tables and figures (CSV / PNG)
+├── notebook
+│   ├── analysis.html
+│   └── analysis.ipynb
+└── readme.md
+```
 
-#todo
+The entire workflow is implemented in `analysis.ipynb`.
 
-The main analytical workflow is currently implemented in a Jupyter notebook.
+Running the notebook will:
+
+- load datasets
+- run the model
+- generate graphs
+- save outputs to `/output`
+
 
 # Data Sources
 
-The analysis uses a combination of electricity market and energy system datasets including:
 
-## Electricity Market Data: Hungarian wholesale electricity prices
+## Electricity Market Data
 
-Source: https://ember-energy.org/data/european-wholesale-electricity-price-data/
+Hungarian wholesale electricity prices
 
-This dataset provides time-series electricity prices.
+Source  
+https://ember-energy.org/data/european-wholesale-electricity-price-data/
+
+Used for:
+
+- price dynamics analysis
+- daily spread calculation
+- time-series forecasting
+
 
 ## Electric Vehicle Statistics
 
-### EV fleet size in Hungary
+Source  
+https://alternative-fuels-observatory.ec.europa.eu/transport-mode/road/hungary
 
-Source: https://alternative-fuels-observatory.ec.europa.eu/transport-mode/road/hungary
+Used for:
 
-This dataset provides statistics on the number of electric vehicles registered in Hungary, including:
-- Battery Electric Vehicles (BEV)
-- Plug-in Hybrid Electric Vehicles (PHEV)
-- other alternative fuel vehicles
+- EV fleet size
+- BEV + PHEV counts
+- fleet projection
 
-The data is used to estimate the potential size of the V2G-capable fleet.  ￼
 
-### Top selling electric vehicles in Hungary
+## Top selling EV models
 
-Source: https://alternative-fuels-observatory.ec.europa.eu/transport-mode/road/hungary
+Source  
+https://alternative-fuels-observatory.ec.europa.eu/transport-mode/road/hungary
 
-This dataset contains information about the most common EV models in Hungary.
+Used to estimate:
 
-### Usable battery capacity of electric vehicles
+- average battery capacity
 
-Source: https://ev-database.org/cheatsheet/useable-battery-capacity-electric-car
 
-This dataset provides the usable battery capacity of EV models.  ￼
+## Battery capacity dataset
 
-## V2G Infrastructure Cost Data
+Source  
+https://ev-database.org/cheatsheet/useable-battery-capacity-electric-car
 
-Source: https://doi.org/10.1016/j.apenergy.2024.123679 (Table 3)
+Used for:
 
-This dataset provides estimated infrastructure costs related to V2G charging stations, including equipment and hardware components.
+- usable battery size
+- safe discharge limits
+
+
+## V2G infrastructure cost data
+
+Source  
+https://doi.org/10.1016/j.apenergy.2024.123679 (Table 3)
+
+Used for:
+
+- station conversion cost
+- amortized investment cost
+- yearly cost interpolation
+
 
 # Methodology Overview
 
-The analysis follows several steps:
 
-1. Data Processing
-- Data ingestion
-- Cleaning and normalization
-- Time-series alignment
+## 1. Data Processing
 
-2. Exploratory Data Analysis
-- Electricity price dynamics
+- cleaning datasets
+- time alignment
+- interpolation
+- normalization
 
-3. V2G Simulation
-- Modeling EV battery availability
-- Simulating charge/discharge strategies
-- Estimating arbitrage potential
 
-4. Economic Evaluation
-- Revenue estimation
-- Cost assumptions
-- Net present value analysis
-- Payback period estimation
+## 2. Exploratory Data Analysis
+
+- hourly price patterns
+- weekday vs weekend
+- seasonal patterns
+- daily price spreads
+
+
+## 3. Forecasting
+
+Electricity price forecast to 2030 using:
+
+- PyTimeTK
+- Random Forest regression
+- seasonal features
+
+
+EV fleet projection using:
+
+- logistic growth model
+- upper saturation cap
+
+
+Infrastructure cost projection using:
+
+- linear interpolation
+
+
+## 4. V2G Simulation Model
+
+For each year 2021-2030:
+
+- EV participation assumptions
+- charging / discharging windows
+- safe battery limits
+- price-based dispatch
+- station cost accumulation
+- yearly profit calculation
+
+
+## 5. Incentive Model
+
+Profit is redistributed to EV owners as price surplus:
+```
+Surplus = Annual profit / (Eligible EV × Battery Usable Energy × total discharge hours)
+```
+
+This represents a market-based incentive.
+
+
+## 6. Economic Evaluation
+
+- annual income
+- annual cost
+- annual profit
+- discounted profit
+- Net Present Value (NPV)
+
 
 # Tools and Technologies
 
-The project is implemented using:
 - Python
 - Jupyter Notebook
 - Pandas
 - NumPy
-- Matplotlib / visualization libraries
+- Matplotlib
+- PyTimeTK
+- scikit-learn
 
-All analysis is performed using reproducible computational workflows.
+
+All figures are saved automatically.
+
 
 # Limitations
 
-This project focuses exclusively on microeconomic feasibility and therefore does not cover:
-- Technical feasibility of V2G hardware
-- Regulatory or legislative analysis
-- Battery degradation engineering studies
-- Detailed infrastructure installation costs
-- Consumer behavior analysis
+This project focuses on microeconomic feasibility only.
+
+Not included:
+
+- hardware engineering analysis
+- grid stability simulation
+- regulatory analysis
+- battery degradation modeling
+- consumer psychology
+
 
 # Team
 
 Project team:
-- Shayan Ghiaseddin: MSc Business Informatics – Corvinus University of Budapest
-- Sofia Nikolaeva: MSc Business Informatics – Corvinus University of Budapest
-- Nurzada Nasirova: MSc Business Informatics – Corvinus University of Budapest
 
-This is group project for **Data Science project in Business** course by Tibor Kovács, at Corvinus University of Budapest, Spring 2026
+- Shayan Ghiaseddin  
+- Sofia Nikolaeva  
+- Nurzada Nasirova  
+
+MSc Business Informatics  
+Corvinus University of Budapest
+
+Course:
+
+Data Science Project in Business, by Associate Professor Tibor Kovács
+Spring 2026
+
 
 # Disclaimer
 
-This repository contains academic research in progress.
-Results, assumptions, and models are subject to revision as the project develops.
+- This repository contains academic research.
+- Results depend on assumptions and scenario parameters.
+- The model is intended for educational and analytical purposes.
