@@ -299,6 +299,27 @@ def get_snapshot_metrics(prediction_frame: pd.DataFrame, snapshot_start: str | p
     if day_df.empty:
         raise ValueError(f"No predicted price data available for {snapshot_day.date()}.")
 
+    # If the request arrives during the overnight charging window
+    # (for example 01:00), keep charging until PLUGOUT_TIME.
+    if snapshot_start.hour < PLUGOUT_TIME:
+        forced_charge_df = horizon_df[
+            (horizon_df["Datetime"] >= snapshot_start) &
+            (horizon_df["date"] == snapshot_day) &
+            (horizon_df["hour"] < PLUGOUT_TIME)
+        ].copy().sort_values("Datetime")
+
+        return {
+            "snapshot_start": snapshot_start,
+            "snapshot_end": snapshot_end,
+            "evening_avg_price": None,
+            "avg_discharge_price": None,
+            "avg_charge_price": None,
+            "spread": None,
+            "is_profitable": True,
+            "discharge_hours": set(),
+            "charge_hours": set(forced_charge_df["Datetime"]),
+        }
+
     evening_df = day_df[day_df["hour"] >= max(PLUGIN_TIME, snapshot_start.hour)].copy()
     evening_avg_price = evening_df["PredictedPrice"].mean() if not evening_df.empty else np.nan
 

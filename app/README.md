@@ -116,3 +116,16 @@ This endpoint is intended as a live demonstration endpoint for the deployed serv
 - The app uses Budapest local time for request handling and scheduling
 
 Adjust constants in `config.py` as needed.
+
+## Train datasets
+
+### Electricity Market Data
+
+Source  
+https://ember-energy.org/data/european-wholesale-electricity-price-data/
+
+
+### Budapest Weather History
+
+Source
+https://www.kaggle.com/datasets/demetera/budapest-weather-history-from-2012
