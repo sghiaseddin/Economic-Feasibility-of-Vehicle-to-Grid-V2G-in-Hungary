@@ -300,7 +300,11 @@ def get_snapshot_metrics(prediction_frame: pd.DataFrame, snapshot_start: str | p
         raise ValueError(f"No predicted price data available for {snapshot_day.date()}.")
 
     # If the request arrives during the overnight charging window
-    # (for example 01:00), keep charging until PLUGOUT_TIME.
+    # (for example 01:00), force charging until PLUGOUT_TIME,
+    # then force idle from PLUGOUT_TIME until 17:00.
+    forced_charge_hours: set[pd.Timestamp] = set()
+    forced_idle_hours: set[pd.Timestamp] = set()
+
     if snapshot_start.hour < PLUGOUT_TIME:
         forced_charge_df = horizon_df[
             (horizon_df["Datetime"] >= snapshot_start) &
@@ -308,17 +312,14 @@ def get_snapshot_metrics(prediction_frame: pd.DataFrame, snapshot_start: str | p
             (horizon_df["hour"] < PLUGOUT_TIME)
         ].copy().sort_values("Datetime")
 
-        return {
-            "snapshot_start": snapshot_start,
-            "snapshot_end": snapshot_end,
-            "evening_avg_price": None,
-            "avg_discharge_price": None,
-            "avg_charge_price": None,
-            "spread": None,
-            "is_profitable": True,
-            "discharge_hours": set(),
-            "charge_hours": set(forced_charge_df["Datetime"]),
-        }
+        forced_idle_df = horizon_df[
+            (horizon_df["date"] == snapshot_day) &
+            (horizon_df["hour"] >= PLUGOUT_TIME) &
+            (horizon_df["hour"] < 17)
+        ].copy().sort_values("Datetime")
+
+        forced_charge_hours = set(forced_charge_df["Datetime"])
+        forced_idle_hours = set(forced_idle_df["Datetime"])
 
     evening_df = day_df[day_df["hour"] >= max(PLUGIN_TIME, snapshot_start.hour)].copy()
     evening_avg_price = evening_df["PredictedPrice"].mean() if not evening_df.empty else np.nan
@@ -360,6 +361,8 @@ def get_snapshot_metrics(prediction_frame: pd.DataFrame, snapshot_start: str | p
         "is_profitable": bool(is_profitable),
         "discharge_hours": set(discharge_hours_df["Datetime"]),
         "charge_hours": set(charge_window_df["Datetime"]),
+        "forced_charge_hours": forced_charge_hours,
+        "forced_idle_hours": forced_idle_hours,
     }
 
 
@@ -368,6 +371,10 @@ def decide_snapshot_command(ts: str | pd.Timestamp | datetime, snapshot_metrics:
     if ts < snapshot_metrics["snapshot_start"] or ts > snapshot_metrics["snapshot_end"]:
         raise ValueError("Timestamp is outside the snapshot window.")
 
+    if ts in snapshot_metrics.get("forced_charge_hours", set()):
+        return "1"
+    if ts in snapshot_metrics.get("forced_idle_hours", set()):
+        return "0"
     if not snapshot_metrics["is_profitable"]:
         return "0"
     if ts in snapshot_metrics["discharge_hours"]:
