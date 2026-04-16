@@ -41,3 +41,6 @@ docker-compose.override.yml
 
 # Jupyter or temporary notebooks
 *.ipynb_checkpoints/
+
+# App
+app/models

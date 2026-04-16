@@ -5,7 +5,7 @@ The goal of the project is to evaluate whether electric vehicle batteries can ec
 This repository represents the final analytical version of the project including data processing, time-series modeling, economic simulation, and Net Present Value evaluation.
 
 
-## Version 1.0.1
+## Version 2.0.0
 
 
 # Project Motivation
@@ -55,6 +55,7 @@ Current repository includes:
 # Repository Structure
 ```
 project/
+├─ app
 ├─ data
 │       Raw input datasets
 ├─ output
